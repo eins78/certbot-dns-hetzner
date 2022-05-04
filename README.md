@@ -1,4 +1,4 @@
-# Lets’ Encrypt x Hetzner DNS challenge
+# Lets’ Encrypt × Hetzner: Certbot DNS-01 challenge
 
 > _forked from <https://github.com/dschoeffm/hetzner-dns-certbot>_
 
@@ -6,7 +6,7 @@
 
 install:
 
-- get a [API TOken for the Hetzner DNS Console](https://docs.hetzner.com/dns-console/dns/general/api-access-token)
+- get an [API TOken for the Hetzner DNS Console](https://docs.hetzner.com/dns-console/dns/general/api-access-token)
 
 ```bash
 apt update && apt install -y curl jq certbot
