@@ -62,9 +62,9 @@ Further Reading:
 - Hetzner Docs:
   <https://community.hetzner.com/tutorials/letsencrypt-dns>
 
-### DNS record at customer domain
+### Example DNS record at customer domain
 
-This delegates the DNS-validation of the domain customer.example.org to another domain under the example.com namespace
+This delegates the DNS-validation of the domain `customer.example.org` to another domain under the `example.com` namespace
 
 ```text
 _acme-challenge.customer.example.org. 10800 IN CNAME letsencrypt-test.example.org._validation.example.com.
