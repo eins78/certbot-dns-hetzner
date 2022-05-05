@@ -1,4 +1,4 @@
-# Lets’ Encrypt × Hetzner: Certbot DNS-01 challenge
+# Let’s Encrypt × Hetzner: Certbot DNS-01 challenge
 
 > _forked from <https://github.com/dschoeffm/hetzner-dns-certbot>_
 
@@ -9,10 +9,8 @@ install:
 - get an [API TOken for the Hetzner DNS Console](https://docs.hetzner.com/dns-console/dns/general/api-access-token)
 
 ```bash
-apt update && apt install -y curl jq certbot
-for SCRIPT in certbot-hetzner-auth.sh certbot-hetzner-cleanup.sh; do
-  curl -sL "https://github.com/eins78/hetzner-dns-certbot/raw/master/${SCRIPT}" > "/usr/local/bin/${SCRIPT}" && chmod +x "/usr/local/bin/${SCRIPT}"
-done
+apt update && apt install -y curl dig jq certbot
+curl -sL "https://github.com/eins78/hetzner-dns-certbot/raw/master/certbot-hook-hetzner" > /usr/local/bin/certbot-hook-hetzner && chmod +x /usr/local/bin/certbot-hook-hetzner
 echo 'your_secret_hetzner_dns_api_token' > /etc/hetzner-dns-token
 ```
 
@@ -31,14 +29,14 @@ run:
 certbot certonly -n \
 --agree-tos --no-eff-email \
 -m 'office+letest@kte.is' --manual-public-ip-logging-ok \
---manual --preferred-challenges=dns --manual-auth-hook /usr/local/bin/certbot-hetzner-auth.sh --manual-cleanup-hook /usr/local/bin/certbot-hetzner-cleanup.sh \
+--manual --preferred-challenges=dns --manual-auth-hook '/usr/local/bin/certbot-hook-hetzner auth' --manual-cleanup-hook '/usr/local/bin/certbot-hook-hetzner cleanup' \
 -d customer.example.org
 
 # wildcard
 certbot certonly -n \
 --agree-tos --no-eff-email \
 -m 'office+letest@kte.is' --manual-public-ip-logging-ok \
---manual --preferred-challenges=dns --manual-auth-hook /usr/local/bin/certbot-hetzner-auth.sh --manual-cleanup-hook /usr/local/bin/certbot-hetzner-cleanup.sh \
+--manual --preferred-challenges=dns --manual-auth-hook '/usr/local/bin/certbot-hook-hetzner auth' --manual-cleanup-hook '/usr/local/bin/certbot-hook-hetzner cleanup' \
 -d letsencrypt-test.kiste.li -d *.letsencrypt-test.kiste.li
 
 ```
