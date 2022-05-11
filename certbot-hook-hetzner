@@ -11,19 +11,27 @@ challenge_string="$CERTBOT_VALIDATION"
 
 # our config, the API token for the Hetzner DNS API
 api_auth_token=$(cat /etc/hetzner-dns-token)
+external_dns_server=8.8.8.8 # google
 
 # check if validation for this hostname was delegated (with a CNAME record)
+echo "Validating domain '${challenge_domain}'"
 challenge_cname="$(dig +noall +short "_acme-challenge.${CERTBOT_DOMAIN}" | sed 's/\.$//')"
 if test -n "$challenge_cname"; then challenge_domain="$challenge_cname"; fi
+echo "Using challenge domain '${challenge_domain}'"
 
 # find the id of the "zone" in the DNS console which we need to modify
 zone_domain="$challenge_domain"
-while test -z "$zone_id" ; do
+while test -z "${zone_id:-}" ; do
   zone_id=$(curl --silent -H "Auth-API-Token: ${api_auth_token}" \
     "https://dns.hetzner.com/api/v1/zones?search_name=${zone_domain}" | \
     jq ".\"zones\"[] | select(.name == \"${zone_domain}\") | .id" 2>/dev/null | tr -d '"')
-  # if not found yet, continue looking with 1 less sudomain
-  zone_domain="$(echo "$zone_domain" | cut -s -d'.' -f 2-)"
+  if ! test -z "$zone_id"; then
+    echo "Using DNS zone '${zone_domain}' with id '${zone_id}"
+    break
+  else
+    # if not found yet, continue looking with 1 less sudomain
+    zone_domain="$(echo "$zone_domain" | cut -s -d'.' -f 2-)"
+  fi
   # fail when search is exhausted (no more subdomains to remove)
   if test -z "$zone_domain"; then
     echo "ERROR: could not find DNS zone!" >&2
@@ -34,16 +42,19 @@ done
 # COMMANDS
 
 auth(){
+  # clenaup any old records
+  cleanup
+
   # create the challenge DNS record
   curl --silent -X "POST" "https://dns.hetzner.com/api/v1/records" \
     -H 'Content-Type: application/json' \
     -H "Auth-API-Token: ${api_auth_token}" \
-    -d "{ \"value\": \"${challenge_string}\", \"ttl\": 300, \"type\": \"TXT\", \"name\": \"${challenge_domain}.\", \"zone_id\": \"${zone_id}\" }"
+    -d "{ \"value\": \"${challenge_string}\", \"ttl\": 30, \"type\": \"TXT\", \"name\": \"${challenge_domain}.\", \"zone_id\": \"${zone_id}\" }"
 
   # wait until we can observe the correct value in the DNS record
-  printf "waiting for DNS record to be visible..." && \
-  while ! test "\"${challenge_string}\"" = "$(dig -t txt +short "${challenge_domain}")"; do printf '.'; sleep 3; done && \
-echo " OK!"
+  printf "waiting for DNS record to be visible on external DNS ($external_dns_server)..." && \
+  while ! test "\"${challenge_string}\"" = "$(dig @"$external_dns_server" -t txt +short "${challenge_domain}")"; do printf '.'; sleep 5; done
+  echo " OK!"
 }
 
 cleanup() {

@@ -9,7 +9,7 @@ install:
 - get an [API TOken for the Hetzner DNS Console](https://docs.hetzner.com/dns-console/dns/general/api-access-token)
 
 ```bash
-apt update && apt install -y curl dig jq certbot
+apt update && apt install -y curl jq dnsutils certbot
 curl -sL "https://github.com/eins78/hetzner-dns-certbot/raw/master/certbot-hook-hetzner" > /usr/local/bin/certbot-hook-hetzner && chmod +x /usr/local/bin/certbot-hook-hetzner
 echo 'your_secret_hetzner_dns_api_token' > /etc/hetzner-dns-token
 ```
