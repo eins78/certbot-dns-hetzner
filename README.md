@@ -6,7 +6,7 @@
 
 install:
 
-- get an [API TOken for the Hetzner DNS Console](https://docs.hetzner.com/dns-console/dns/general/api-access-token)
+- get an [API Token for the Hetzner DNS Console](https://docs.hetzner.com/dns-console/dns/general/api-access-token)
 
 ```bash
 apt update && apt install -y curl jq dnsutils certbot
